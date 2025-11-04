@@ -85,6 +85,8 @@ public class RoomService {
     }
 
     public long getAvailableRoomCount() {
-        return getAvailableRooms().size();
+        return roomRepository.findAll().stream()
+                .filter(room -> room.getStatus() == RoomStatus.AVAILABLE)
+                .count();
     }
 }

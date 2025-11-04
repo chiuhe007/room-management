@@ -239,6 +239,10 @@ public class Main {
             System.out.println("1. SINGLE (单人间) 2. DOUBLE (双人间) 3. SUITE (套房) 4. DELUXE (豪华房)");
             System.out.print("选择: ");
             int typeChoice = getIntInput();
+            if (typeChoice < 1 || typeChoice > RoomType.values().length) {
+                System.out.println("✗ 无效的房间类型选择 (Invalid room type choice)");
+                return;
+            }
             RoomType roomType = RoomType.values()[typeChoice - 1];
             
             System.out.print("楼层 (Floor): ");
@@ -268,6 +272,10 @@ public class Main {
             System.out.println("1. AVAILABLE (可用) 2. OCCUPIED (已占用) 3. MAINTENANCE (维护中) 4. RESERVED (已预订)");
             System.out.print("选择: ");
             int statusChoice = getIntInput();
+            if (statusChoice < 1 || statusChoice > RoomStatus.values().length) {
+                System.out.println("✗ 无效的状态选择 (Invalid status choice)");
+                return;
+            }
             RoomStatus newStatus = RoomStatus.values()[statusChoice - 1];
             
             Room room = roomService.updateRoomStatus(roomNumber, newStatus);
@@ -442,6 +450,11 @@ public class Main {
             System.out.print("请输入数字 (Please enter a number): ");
             scanner.next();
         }
-        return scanner.nextInt();
+        int value = scanner.nextInt();
+        if (value < 0) {
+            System.out.print("请输入非负数 (Please enter a non-negative number): ");
+            return getIntInput();
+        }
+        return value;
     }
 }
