@@ -1,7 +1,8 @@
 // utils/api.js
 // 小程序API服务模块
 
-const BASE_URL = 'http://localhost:3000/api'
+// const BASE_URL = 'http://localhost:3000/api'
+const BASE_URL = 'http://glaucuss.xyz/:3000/api'
 const auth = require('./auth.js')
 
 /**

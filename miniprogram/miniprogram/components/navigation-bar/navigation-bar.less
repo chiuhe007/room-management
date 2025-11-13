@@ -25,6 +25,8 @@
   padding-top: env(safe-area-inset-top);
   width: 100%;
   box-sizing: border-box;
+  background: linear-gradient(135deg, #1976d2, #1565c0);
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
 }
 
 .weui-navigation-bar__left {
@@ -40,10 +42,14 @@
 .weui-navigation-bar__btn_goback_wrapper {
   padding: 11px 18px 11px 16px;
   margin: -11px -18px -11px -16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
 }
 
 .weui-navigation-bar__btn_goback_wrapper.weui-active {
-  opacity: 0.5;
+  opacity: 0.7;
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(0.95);
 }
 
 .weui-navigation-bar__btn_goback {
@@ -54,20 +60,23 @@
   mask: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='24' viewBox='0 0 12 24'%3E  %3Cpath fill-opacity='.9' fill-rule='evenodd' d='M10 19.438L8.955 20.5l-7.666-7.79a1.02 1.02 0 0 1 0-1.42L8.955 3.5 10 4.563 2.682 12 10 19.438z'/%3E%3C/svg%3E") no-repeat 50% 50%;
   -webkit-mask-size: cover;
   mask-size: cover;
-  background-color: var(--weui-FG-0);
+  background-color: #ffffff;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
 }
 
 .weui-navigation-bar__center {
-  font-size: 17px;
+  font-size: 18px;
   text-align: center;
   position: relative;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
+  font-weight: 600;
   flex: 1;
   height: 100%;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .weui-navigation-bar__loading {

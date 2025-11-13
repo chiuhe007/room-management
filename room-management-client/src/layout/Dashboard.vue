@@ -3,8 +3,24 @@
     <!-- 左侧菜单栏 -->
     <el-aside class="layout-aside" :width="isCollapse ? '64px' : '240px'">
       <div class="logo" @click="toggleCollapse">
-        <i class="logo-icon">🏨</i>
-        <span v-show="!isCollapse" class="logo-text">客房管理</span>
+        <div class="logo-icon">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="12" width="24" height="16" fill="#3B82F6" rx="2"/>
+            <path d="M2 14L16 4L30 14H28V12L16 6L4 12V14H2Z" fill="#1E40AF"/>
+            <rect x="7" y="16" width="3" height="3" fill="#DBEAFE" rx="0.5"/>
+            <rect x="12" y="16" width="3" height="3" fill="#DBEAFE" rx="0.5"/>
+            <rect x="17" y="16" width="3" height="3" fill="#DBEAFE" rx="0.5"/>
+            <rect x="22" y="16" width="3" height="3" fill="#DBEAFE" rx="0.5"/>
+            <rect x="7" y="21" width="3" height="3" fill="#DBEAFE" rx="0.5"/>
+            <rect x="12" y="21" width="3" height="3" fill="#DBEAFE" rx="0.5"/>
+            <rect x="17" y="21" width="3" height="3" fill="#DBEAFE" rx="0.5"/>
+            <rect x="22" y="21" width="3" height="3" fill="#DBEAFE" rx="0.5"/>
+            <rect x="14" y="22" width="4" height="6" fill="#1E40AF" rx="0.5"/>
+            <circle cx="16.5" cy="25" r="0.5" fill="#DBEAFE"/>
+            <path d="M16 2L17 5L20 5L17.5 7L18.5 10L16 8.5L13.5 10L14.5 7L12 5L15 5L16 2Z" fill="#FCD34D"/>
+          </svg>
+        </div>
+        <span v-show="!isCollapse" class="logo-text">智慧酒店管理</span>
         <i class="collapse-btn el-icon-s-fold" v-show="!isCollapse"></i>
         <i class="collapse-btn el-icon-s-unfold" v-show="isCollapse"></i>
       </div>
@@ -226,6 +242,24 @@ import { getUnreadCount, getUnreadNotifications } from '@/api/notification';
 const router = useRouter();
 const route = useRoute();
 
+// 动态设置页面标题
+const setPageTitle = () => {
+  const routeTitles = {
+    '/': '仪表盘 - 智慧酒店管理系统',
+    '/rooms': '房间管理 - 智慧酒店管理系统', 
+    '/bookings': '预订管理 - 智慧酒店管理系统',
+    '/checkin': '入住管理 - 智慧酒店管理系统',
+    '/customers': '客户管理 - 智慧酒店管理系统',
+    '/users': '用户管理 - 智慧酒店管理系统',
+    '/chat': '客服中心 - 智慧酒店管理系统',
+    '/profile': '个人中心 - 智慧酒店管理系统',
+    '/settings': '系统设置 - 智慧酒店管理系统'
+  };
+  
+  const title = routeTitles[route.path] || '智慧酒店管理系统';
+  document.title = title;
+};
+
 const username = localStorage.getItem("username") || "用户";
 const role = localStorage.getItem('role') || '';
 const userAvatar = localStorage.getItem("userAvatar") || "";
@@ -339,6 +373,14 @@ onMounted(() => {
     isMobile.value = window.innerWidth <= 768;
   };
   window.addEventListener('resize', handleResize);
+  
+  // 设置初始页面标题
+  setPageTitle();
+  
+  // 监听路由变化，动态更新页面标题
+  router.afterEach(() => {
+    setPageTitle();
+  });
   
   // 初始加载通知数量
   fetchUnreadNotificationCount();
@@ -518,15 +560,38 @@ const handleLogout = () => {
 }
 
 .logo-icon {
-  font-size: 20px;
-  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-right: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 4px;
+  transition: all 0.3s ease;
+}
+
+.logo-icon svg {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.logo:hover .logo-icon {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
 }
 
 .logo-text {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.5px;
   flex: 1;
+  background: linear-gradient(45deg, #ffffff, #e0f2fe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .collapse-btn {

@@ -8,26 +8,26 @@
     "pages/logs/logs"
   ],
   "tabBar": {
-    "color": "#8a8a8a",
+    "color": "#666666",
     "selectedColor": "#1976d2", 
     "backgroundColor": "#ffffff",
-    "borderStyle": "black",
+    "borderStyle": "white",
     "list": [
       {
         "pagePath": "pages/index/index",
-        "text": "🏠\n主页"
+        "text": "主页"
       },
       {
         "pagePath": "pages/rooms/rooms", 
-        "text": "🏨\n预订"
+        "text": "预订"
       },
       {
         "pagePath": "pages/my-bookings/my-bookings",
-        "text": "📋\n行程"
+        "text": "行程"
       },
       {
         "pagePath": "pages/profile/profile",
-        "text": "👤\n我的"
+        "text": "我的"
       }
     ]
   },

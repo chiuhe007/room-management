@@ -1,0 +1,26 @@
+<!-- SVG Logo for Hotel Management System -->
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Building base -->
+  <rect x="4" y="12" width="24" height="16" fill="#3B82F6" rx="2"/>
+  
+  <!-- Building roof -->
+  <path d="M2 14L16 4L30 14H28V12L16 6L4 12V14H2Z" fill="#1E40AF"/>
+  
+  <!-- Windows -->
+  <rect x="7" y="16" width="3" height="3" fill="#DBEAFE" rx="0.5"/>
+  <rect x="12" y="16" width="3" height="3" fill="#DBEAFE" rx="0.5"/>
+  <rect x="17" y="16" width="3" height="3" fill="#DBEAFE" rx="0.5"/>
+  <rect x="22" y="16" width="3" height="3" fill="#DBEAFE" rx="0.5"/>
+  
+  <rect x="7" y="21" width="3" height="3" fill="#DBEAFE" rx="0.5"/>
+  <rect x="12" y="21" width="3" height="3" fill="#DBEAFE" rx="0.5"/>
+  <rect x="17" y="21" width="3" height="3" fill="#DBEAFE" rx="0.5"/>
+  <rect x="22" y="21" width="3" height="3" fill="#DBEAFE" rx="0.5"/>
+  
+  <!-- Door -->
+  <rect x="14" y="22" width="4" height="6" fill="#1E40AF" rx="0.5"/>
+  <circle cx="16.5" cy="25" r="0.5" fill="#DBEAFE"/>
+  
+  <!-- Star decoration (hotel rating) -->
+  <path d="M16 2L17 5L20 5L17.5 7L18.5 10L16 8.5L13.5 10L14.5 7L12 5L15 5L16 2Z" fill="#FCD34D"/>
+</svg>
