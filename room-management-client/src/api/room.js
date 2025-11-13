@@ -18,3 +18,6 @@ export function deleteRoom(id) {
 }
 
 export const getRoomNumbers = () => request.get('/rooms/numbers'); // ✅ 使用 request
+
+// 获取房型价格映射
+export const getRoomTypePrices = () => request.get('/rooms/prices');

@@ -1,6 +1,7 @@
 const express = require('express');
 const verifyToken = require('../middlewares/verifyToken');
 const authorizeRole = require('../middlewares/authorizeRole');
+const { uploadSingle, handleUploadError } = require('../middlewares/uploadImage');
 const roomController = require('../controllers/roomController');
 const router = express.Router();
 
@@ -40,7 +41,8 @@ const router = express.Router();
  *                   status:
  *                     type: string
  */
-router.get('/rooms', verifyToken, authorizeRole(['admin', 'reception']), roomController.list);
+// 对外公开：前端/小程序需要获取可用房型/房间列表，无需 token
+router.get('/rooms', roomController.list);
 
 /**
  * @swagger
@@ -126,7 +128,7 @@ router.post('/rooms', verifyToken, authorizeRole(['admin']), roomController.crea
  *                   type: string
  *                   example: 更新成功
  */
-router.put('/rooms/:id', verifyToken, authorizeRole(['admin', 'reception']), roomController.update);
+router.put('/rooms/:id', verifyToken, authorizeRole(['admin', 'reception', 'housekeeper']), roomController.update);
 
 
 /**
@@ -183,6 +185,68 @@ router.delete('/rooms/:id', verifyToken, authorizeRole(['admin']), roomControlle
  *                     type: string
  *                     example: "大床房"
  */
-router.get('/rooms/numbers', verifyToken, authorizeRole(['admin', 'reception']), roomController.getAllRoomNumbers);
+// 房号列表接口保留为受限接口（仅内部/管理员调用）
+router.get('/rooms/numbers', verifyToken, authorizeRole(['admin', 'reception', 'housekeeper']), roomController.getAllRoomNumbers);
+
+/**
+ * @swagger
+ * /api/rooms/prices:
+ *   get:
+ *     summary: 获取房型价格映射
+ *     tags: [Rooms]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: 返回房型价格映射
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               additionalProperties:
+ *                 type: number
+ *               example:
+ *                 "大床房": 299.00
+ *                 "特价房": 199.00
+ *                 "套房": 599.00
+ */
+// 房型价格允许公开访问，便于小程序计算预订金额
+router.get('/rooms/prices', roomController.getRoomTypePrices);
+
+/**
+ * @swagger
+ * /api/rooms/upload-image:
+ *   post:
+ *     summary: 上传房间图片
+ *     tags: [Rooms]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: 房间图片文件
+ *     responses:
+ *       200:
+ *         description: 图片上传成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 imageUrl:
+ *                   type: string
+ *                 filename:
+ *                   type: string
+ */
+router.post('/rooms/upload-image', verifyToken, authorizeRole(['admin', 'reception', 'housekeeper']), uploadSingle, handleUploadError, roomController.uploadImage);
 
 module.exports = router;

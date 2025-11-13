@@ -1,0 +1,23 @@
+-- 006_add_wechat_user_support.sql
+-- 添加微信用户支持的字段
+
+ALTER TABLE users 
+ADD COLUMN IF NOT EXISTS openid VARCHAR(100) UNIQUE COMMENT '微信openid',
+ADD COLUMN IF NOT EXISTS unionid VARCHAR(100) COMMENT '微信unionid',
+ADD COLUMN IF NOT EXISTS nickname VARCHAR(100) COMMENT '微信昵称',
+ADD COLUMN IF NOT EXISTS avatar_url TEXT COMMENT '微信头像URL',
+ADD COLUMN IF NOT EXISTS phone VARCHAR(20) COMMENT '手机号',
+ADD COLUMN IF NOT EXISTS gender ENUM('male', 'female') COMMENT '性别',
+ADD COLUMN IF NOT EXISTS age INT COMMENT '年龄',
+ADD COLUMN IF NOT EXISTS id_card VARCHAR(20) COMMENT '身份证号',
+ADD COLUMN IF NOT EXISTS email VARCHAR(100) COMMENT '邮箱地址',
+ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间';
+
+-- 添加索引
+CREATE INDEX IF NOT EXISTS idx_users_openid ON users(openid);
+CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
+CREATE INDEX IF NOT EXISTS idx_users_unionid ON users(unionid);
+
+-- 更新现有数据
+UPDATE users SET created_at = NOW(), updated_at = NOW() WHERE created_at IS NULL;

@@ -18,13 +18,41 @@
             </el-form-item>
 
             <el-form-item label="开始日期" prop="startDate">
-                <el-date-picker v-model="form.startDate" type="date" placeholder="选择开始日期" style="width: 100%;"
-                    :disabled-date="disabledStartDate" @change="handleStartDateChange" />
+                <el-date-picker v-model="form.startDate" type="datetime" placeholder="选择开始日期时间" style="width: 100%;"
+                    :disabled-date="disabledStartDate" @change="handleStartDateChange" 
+                    format="YYYY-MM-DD HH:mm"
+                    value-format="YYYY-MM-DD HH:mm" />
             </el-form-item>
 
             <el-form-item label="结束日期" prop="endDate">
-                <el-date-picker v-model="form.endDate" type="date" placeholder="选择结束日期" style="width: 100%;"
-                    :disabled-date="disabledEndDate" />
+                <el-date-picker v-model="form.endDate" type="datetime" placeholder="选择结束日期时间" style="width: 100%;"
+                    :disabled-date="disabledEndDate" 
+                    format="YYYY-MM-DD HH:mm"
+                    value-format="YYYY-MM-DD HH:mm" />
+            </el-form-item>
+
+            <el-form-item label="预订状态" prop="status">
+                <el-select v-model="form.status" placeholder="请选择状态">
+                    <el-option label="待确认" value="pending" />
+                    <el-option label="已确认" value="confirmed" />
+                    <el-option label="正在入住" value="checked_in" />
+                    <el-option label="已离店" value="checked_out" />
+                    <el-option label="已取消" value="cancelled" />
+                </el-select>
+            </el-form-item>
+
+            <el-form-item label="预订金额" prop="amount">
+                <el-input-number 
+                    v-model="form.amount" 
+                    :min="0" 
+                    :precision="2" 
+                    placeholder="系统自动计算"
+                    style="width: 100%;"
+                    :disabled="isAmountCalculated"
+                />
+                <div v-if="calculatedInfo" class="amount-info">
+                    {{ calculatedInfo }}
+                </div>
             </el-form-item>
 
             <el-form-item label="备注">
@@ -42,14 +70,16 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { addBooking, updateBooking } from '@/api/booking';
 import { getCustomers, addCustomer } from '@/api/customer';
+import { getRoomTypePrices } from '@/api/room';
 import CustomerFormDialog from '@/components/CustomerFormDialog.vue'; // ✅ 引入组件
 
 const customerDialogVisible = ref(false);
 const newCustomerInitData = ref({});
+const roomTypePrices = ref({}); // 房型价格映射
 
 const props = defineProps({
     visible: Boolean,
@@ -65,6 +95,8 @@ const form = ref({
     roomType: '',
     startDate: '',
     endDate: '',
+    status: 'pending',
+    amount: 0.00,
     remark: ''
 });
 
@@ -84,6 +116,19 @@ const rules = {
             },
             trigger: 'change'
         }
+    ],
+    status: [{ required: true, message: '请选择预订状态', trigger: 'change' }],
+    amount: [
+        { required: true, message: '请输入预订金额', trigger: 'blur' },
+        {
+            validator(rule, value) {
+                if (value < 0) {
+                    return Promise.reject(new Error('金额不能为负数'));
+                }
+                return Promise.resolve();
+            },
+            trigger: 'blur'
+        }
     ]
 };
 
@@ -100,6 +145,8 @@ watch(
                 roomType: '',
                 startDate: '',
                 endDate: '',
+                status: 'pending',
+                amount: 0.00,
                 remark: ''
             };
         }
@@ -107,11 +154,92 @@ watch(
     { immediate: true }
 );
 
+// 计算预订天数
+const calculateDays = () => {
+    if (!form.value.startDate || !form.value.endDate) return 0;
+    
+    const start = new Date(form.value.startDate);
+    const end = new Date(form.value.endDate);
+    
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return 0;
+    
+    const timeDiff = end.getTime() - start.getTime();
+    const days = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    
+    return Math.max(days, 1); // 至少1天
+};
+
+// 计算价格信息
+const calculatedInfo = computed(() => {
+    const days = calculateDays();
+    const pricePerNight = roomTypePrices.value[form.value.roomType] || 0;
+    
+    if (days > 0 && pricePerNight > 0) {
+        return `${days}晚 × ¥${pricePerNight.toFixed(2)}/晚 = ¥${(days * pricePerNight).toFixed(2)}`;
+    }
+    return '';
+});
+
+// 是否显示为计算出的金额
+const isAmountCalculated = computed(() => {
+    return form.value.roomType && form.value.startDate && form.value.endDate;
+});
+
+// 自动计算金额
+const updateCalculatedAmount = () => {
+    const days = calculateDays();
+    const pricePerNight = roomTypePrices.value[form.value.roomType] || 0;
+    
+    if (days > 0 && pricePerNight > 0) {
+        form.value.amount = days * pricePerNight;
+    }
+};
+
+// 监听房型、开始日期、结束日期变化，自动计算价格
+watch([() => form.value.roomType, () => form.value.startDate, () => form.value.endDate], () => {
+    updateCalculatedAmount();
+}, { immediate: true });
+
+// 获取房型价格
+const fetchRoomTypePrices = async () => {
+    try {
+        console.log('🔍 开始获取房型价格...');
+        const response = await getRoomTypePrices();
+        
+        // 处理不同的响应格式
+        let prices = {};
+        if (response && typeof response === 'object') {
+            if (response.data && typeof response.data === 'object') {
+                prices = response.data;
+            } else if (typeof response === 'object' && !Array.isArray(response)) {
+                prices = response;
+            }
+        }
+        
+        roomTypePrices.value = prices;
+        console.log('💰 获取到房型价格:', prices);
+        
+        // 如果表单已有数据，重新计算价格
+        updateCalculatedAmount();
+    } catch (error) {
+        console.error('❌ 获取房型价格失败:', error);
+        const errorMsg = error.response?.data?.message || error.message || '获取房型价格失败';
+        ElMessage.warning(`${errorMsg}，请手动输入金额`);
+        roomTypePrices.value = {}; // 清空价格数据
+    }
+};
+
+// 组件挂载时获取房型价格
+onMounted(() => {
+    fetchRoomTypePrices();
+});
+
 // 日期处理
 const handleStartDateChange = (val) => {
     if (form.value.endDate && val > form.value.endDate) {
         form.value.endDate = val;
     }
+    updateCalculatedAmount(); // 重新计算价格
 };
 
 const disabledStartDate = (date) => {
@@ -175,13 +303,15 @@ const submitBooking = async (customer_id) => {
             roomType: form.value.roomType,
             startDate: form.value.startDate,
             endDate: form.value.endDate,
+            status: form.value.status,
+            amount: form.value.amount,
             remark: form.value.remark,
             customer_id
         };
 
         if (form.value.id) {
-            payload.id = form.value.id;
-            await updateBooking(payload);
+            // 更新预订：传递ID和数据作为两个参数
+            await updateBooking(form.value.id, payload);
             ElMessage.success('更新成功');
         } else {
             await addBooking(payload);
@@ -211,4 +341,11 @@ const handleClose = () => {
 
 </script>
 
-<style scoped></style>
+<style scoped>
+.amount-info {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #606266;
+    font-style: italic;
+}
+</style>

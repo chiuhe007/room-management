@@ -1,0 +1,100 @@
+<!-- pages/index/index.wxml -->
+<view class="container">
+  <!-- 欢迎横幅 -->
+  <view class="welcome-banner">
+    <view class="banner-content">
+      <view class="greeting">
+        <text class="greeting-text">{{userInfo ? '您好，' + userInfo.nickName : '欢迎使用酒店预订'}}</text>
+        <text class="greeting-sub">为您提供便捷的预订服务</text>
+      </view>
+      <image class="banner-icon" src="/images/hotel-service.svg" mode="aspectFit"></image>
+    </view>
+  </view>
+
+  <!-- 快速功能区 -->
+  <view class="quick-actions">
+    <view class="section-title">快速功能</view>
+    <view class="action-grid">
+      <view class="action-item" bindtap="navigateToRooms">
+        <view class="action-icon">🏨</view>
+        <text class="action-text">预订房间</text>
+      </view>
+      <view class="action-item" bindtap="navigateToBookings">
+        <view class="action-icon">📋</view>
+        <text class="action-text">我的行程</text>
+      </view>
+      <view class="action-item" bindtap="navigateToProfile">
+        <view class="action-icon">👤</view>
+        <text class="action-text">个人中心</text>
+      </view>
+      <view class="action-item" bindtap="showContactInfo">
+        <view class="action-icon">📞</view>
+        <text class="action-text">联系客服</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 服务特色 -->
+  <view class="features">
+    <view class="section-title">服务特色</view>
+    <view class="feature-grid">
+      <view class="feature-item">
+        <view class="feature-icon">⚡</view>
+        <text class="feature-text">极速预订</text>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon">✅</view>
+        <text class="feature-text">实时确认</text>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon">🔒</view>
+        <text class="feature-text">安全可靠</text>
+      </view>
+      <view class="feature-item">
+        <view class="feature-icon">💎</view>
+        <text class="feature-text">品质保证</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 用户状态卡片 -->
+  <view class="user-status-card">
+    <view class="section-title">账户状态</view>
+    <view class="status-content" wx:if="{{userInfo}}">
+      <image class="user-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
+      <view class="user-info">
+        <text class="user-name">{{userInfo.nickName}}</text>
+        <text class="user-status">{{profileComplete ? '信息已完善' : '请完善个人信息'}}</text>
+      </view>
+      <view class="status-indicator {{profileComplete ? 'complete' : 'incomplete'}}">
+        {{profileComplete ? '✅' : '⚠️'}}
+      </view>
+    </view>
+    <view class="status-content" wx:else>
+      <view class="login-prompt">
+        <view class="prompt-icon">🔐</view>
+        <text class="prompt-text">请先完成微信登录</text>
+        <button class="login-btn" bindtap="doWeChatLogin">立即登录</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作提示 -->
+  <view class="tips" wx:if="{{!userInfo || !profileComplete}}">
+    <view class="tip-card">
+      <view class="tip-icon">💡</view>
+      <view class="tip-content">
+        <text class="tip-title">温馨提示</text>
+        <text class="tip-desc">{{userInfo ? '请完善个人信息后即可开始预订' : '请先完成微信登录和个人信息完善，即可开始预订服务'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部状态栏 -->
+  <view class="status-bar">
+    <view class="status-item">
+      <text class="status-label">服务状态</text>
+      <text class="status-value {{isOnline ? 'online' : 'offline'}}">{{isOnline ? '在线' : '离线'}}</text>
+    </view>
+  </view>
+</view>

@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import axios from '@/api/me.js';
 import Login from '@/views/Login.vue';
-import Register from '@/views/Register.vue';   // ← 导入注册页面组件
+import Register from '@/views/Register.vue';
 import Welcome from '@/views/Welcome.vue';
 import RoomList from '@/views/RoomList.vue';
 import Dashboard from '@/layout/Dashboard.vue';
@@ -11,9 +12,10 @@ import UserManagement from '@/views/UserManagement.vue';
 import Workspace from '@/views/Workspace.vue';
 import DeepSeek from '@/components/DeepSeekChat.vue';
 
+// ================== 路由定义 ==================
 const routes = [
   { path: '/login', component: Login },
-  { path: '/register', component: Register },  // ← 新增注册路由
+  { path: '/register', component: Register },
   {
     path: '/',
     component: Dashboard,
@@ -25,8 +27,8 @@ const routes = [
       { path: 'checkins', component: CheckinManagement },
       { path: 'users', component: UserManagement },
       { path: 'workspace', component: Workspace },
-      { path: 'deepseek', component: DeepSeek }
-    ]
+      { path: 'deepseek', component: DeepSeek },
+    ],
   },
   {
     path: '/logout',
@@ -34,25 +36,53 @@ const routes = [
       localStorage.removeItem('token');
       localStorage.removeItem('role');
       next('/login');
-    }
-  }
+    },
+  },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
 });
 
-// 全局登录守卫...
-router.beforeEach((to, from, next) => {
+// ================== 全局登录守卫 ==================
+let isChecking = false;
+
+router.beforeEach(async (to, from, next) => {
   const token = localStorage.getItem('token');
-  if (!token && to.path !== '/login' && to.path !== '/register') {
+
+  // ✅ 登录、注册页面无需 token
+  const publicPages = ['/login', '/register'];
+  const isPublic = publicPages.includes(to.path);
+
+  if (!token) {
+    if (isPublic) return next();
     return next('/login');
   }
-  if (token && (to.path === '/login' || to.path === '/register')) {
+
+  // ✅ 若已登录 → 不允许访问 login/register
+  if (token && isPublic) {
     return next('/');
   }
-  next();
+
+  // ✅ 验证 token 是否有效
+  if (!isChecking) {
+    isChecking = true;
+    try {
+      await axios.get('/me'); 
+      isChecking = false;
+      return next();
+    } catch (error) {
+      // ❌ token 无效 → 自动登出
+      console.warn('[router] Token 无效 → 自动登出');
+      isChecking = false;
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      return next('/login');
+    }
+  }
+
+  return next();
 });
 
 export default router;

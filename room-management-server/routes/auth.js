@@ -1,124 +1,41 @@
 const express = require('express');
 const router = express.Router();
-const authController = require('../controllers/authController');
 
-/**
- * @swagger
- * tags:
- *   name: Auth
- *   description: 用户认证相关接口
- */
+console.log('🔍 调试信息 - 开始加载 auth.js');
 
-/**
- * @swagger
- * /api/verify-slider:
- *   post:
- *     summary: 验证滑块验证码
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               token:
- *                 type: string
- *                 description: 滑块验证通过后的 token
- *     responses:
- *       200:
- *         description: 验证成功
- *       400:
- *         description: 验证失败
- */
-router.post('/verify-slider', authController.verifySlider);
+// 调试模块加载
+try {
+  const authController = require('../controllers/authController');
+  const verifyToken = require('../middlewares/verifyToken');
+  
+  console.log('✅ 模块加载情况:');
+  console.log('  - authController keys:', Object.keys(authController));
+  console.log('  - getCurrentUser 类型:', typeof authController.getCurrentUser);
+  console.log('  - verifyToken 类型:', typeof verifyToken);
+  console.log('  - verifySlider 类型:', typeof authController.verifySlider);
+  
+  // 如果 getCurrentUser 不存在，使用备用方案
+  const getCurrentUser = authController.getCurrentUser || ((req, res) => {
+    console.log('🔄 使用备用 getCurrentUser');
+    res.json({
+      success: true,
+      user: {
+        id: req.user.id,
+        username: req.user.username,
+        role: req.user.role,
+      }
+    });
+  });
 
-/**
- * @swagger
- * /api/send-email-code:
- *   post:
- *     summary: 发送邮箱验证码
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *     responses:
- *       200:
- *         description: 验证码发送成功
- *       500:
- *         description: 发送失败
- */
-router.post('/send-email-code', authController.sendEmailCode);
-
-/**
- * @swagger
- * /api/register:
- *   post:
- *     summary: 用户注册
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *               email:
- *                 type: string
- *               code:
- *                 type: string
- *     responses:
- *       200:
- *         description: 注册成功
- *       400:
- *         description: 参数错误
- *       500:
- *         description: 注册失败
- */
-router.post('/register', authController.register);
-
-/**
- * @swagger
- * /api/login:
- *   post:
- *     summary: 用户登录
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       200:
- *         description: 登录成功
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                 role:
- *                   type: string
- *       401:
- *         description: 登录失败
- */
-router.post('/login', authController.login);
+  router.get('/me', verifyToken, getCurrentUser);
+  router.post('/logout', authController.logout);
+  router.post('/verify-slider', authController.verifySlider);
+  router.post('/send-email-code', authController.sendEmailCode);
+  router.post('/register', authController.register);
+  router.post('/login', authController.login);
+  
+} catch (error) {
+  console.error('❌ 模块加载错误:', error);
+}
 
 module.exports = router;

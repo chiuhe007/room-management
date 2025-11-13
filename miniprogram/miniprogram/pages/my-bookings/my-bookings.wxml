@@ -1,0 +1,194 @@
+<!-- pages/my-bookings/my-bookings.wxml -->
+<view class="container">
+  
+  <!-- 未登录状态 -->
+  <view wx:if="{{!isLoggedIn}}" class="login-panel">
+    <view class="login-card">
+      <view class="login-icon">👤</view>
+      <view class="login-title">查看我的预订</view>
+      <view class="login-desc">登录后可以查看您的预订记录和享受更多个性化服务</view>
+      
+      <button class="login-btn" bindtap="loginWithWechat">
+        <text class="login-icon-text">�</text>
+        微信授权登录
+      </button>
+      
+      <view class="guest-options">
+        <view class="guest-text">还没有预订记录？</view>
+        <button class="guest-btn" bindtap="goToRooms">
+          <text class="guest-btn-text">立即预订房间</text>
+        </button>
+      </view>
+      
+      <view class="login-tips">
+        <view class="tip-item">✓ 查看预订状态和详情</view>
+        <view class="tip-item">✓ 接收预订确认通知</view>
+        <view class="tip-item">✓ 享受会员专属优惠</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 已登录状态 -->
+  <view wx:if="{{isLoggedIn}}">
+    
+    <!-- 工具栏 -->
+    <view class="toolbar">
+      <view class="toolbar-left">
+        <text class="page-title">我的预订</text>
+        <text wx:if="{{hiddenBookingIds.length > 0}}" class="hidden-count">
+          (已隐藏{{hiddenBookingIds.length}}条)
+        </text>
+      </view>
+      <view class="toolbar-right">
+        <button wx:if="{{hiddenBookingIds.length > 0}}" 
+                class="manage-btn" 
+                bindtap="showHiddenManager">
+          管理隐藏
+        </button>
+      </view>
+    </view>
+    
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading">
+    <text>{{refreshing ? '刷新中...' : '加载中...'}}</text>
+  </view>
+
+    <!-- 预订列表 -->
+    <view class="bookings-container">
+      <!-- 空状态 -->
+      <view wx:if="{{!pendingBookings.length && !confirmedBookings.length && !completedBookings.length && !cancelledBookings.length}}" class="empty">
+        <view class="empty-icon">📋</view>
+        <view class="empty-text">暂无预订记录</view>
+        <button class="book-now-btn" bindtap="goToRooms">立即预订</button>
+      </view>
+
+      <!-- 待确认预订 -->
+      <view wx:if="{{pendingBookings.length > 0}}" class="section">
+        <view class="section-title">
+          <view class="title-icon">⏳</view>
+          <text class="title-text">待确认 ({{pendingBookings.length}})</text>
+        </view>
+        <view wx:for="{{pendingBookings}}" wx:key="id" class="booking-card pending">
+          <template is="booking-item" data="{{item}}"/>
+        </view>
+      </view>
+
+      <!-- 已确认预订（预订成功） -->
+      <view wx:if="{{confirmedBookings.length > 0}}" class="section">
+        <view class="section-title">
+          <view class="title-icon">✅</view>
+          <text class="title-text">预订成功 ({{confirmedBookings.length}})</text>
+        </view>
+        <view wx:for="{{confirmedBookings}}" wx:key="id" class="booking-card confirmed">
+          <template is="booking-item" data="{{item}}"/>
+        </view>
+      </view>
+
+      <!-- 已完成预订 -->
+      <view wx:if="{{completedBookings.length > 0}}" class="section">
+        <view class="section-title">
+          <view class="title-icon">🏆</view>
+          <text class="title-text">已完成 ({{completedBookings.length}})</text>
+        </view>
+        <view wx:for="{{completedBookings}}" wx:key="id" class="booking-card completed">
+          <template is="booking-item" data="{{item}}"/>
+        </view>
+      </view>
+
+      <!-- 已取消预订 -->
+      <view wx:if="{{cancelledBookings.length > 0}}" class="section">
+        <view class="section-title">
+          <view class="title-icon">❌</view>
+          <text class="title-text">已取消 ({{cancelledBookings.length}})</text>
+        </view>
+        <view wx:for="{{cancelledBookings}}" wx:key="id" class="booking-card cancelled">
+          <template is="booking-item" data="{{item}}"/>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 预订项目模板 -->
+  <template name="booking-item">
+    <!-- 房型图片 -->
+    <view class="room-image">
+      <image src="{{item.roomImageUrl}}" 
+             mode="aspectFill" 
+             class="room-img"
+             data-booking-id="{{item.id}}"
+             data-room-type="{{item.roomType}}"
+             lazy-load="{{true}}"
+             show-menu-by-longpress="{{false}}"
+             binderror="onImageError"/>
+      <view class="status-tag {{item.statusClass}}">
+        {{item.statusText}}
+      </view>
+    </view>
+
+    <!-- 预订信息 -->
+    <view class="booking-content">
+      <view class="booking-header">
+        <view class="booking-id">订单号: {{item.id}}</view>
+        <view class="booking-amount">¥{{item.amount}}</view>
+      </view>
+
+      <view class="room-info">
+        <view class="room-type">{{item.roomType}}</view>
+        <view class="customer-name">{{item.customer}}</view>
+      </view>
+
+      <view class="date-info">
+        <view class="date-row">
+          <text class="date-label">入住:</text>
+          <text class="date-value">{{item.formattedStartDate}} 15:00</text>
+        </view>
+        <view class="date-row">
+          <text class="date-label">离店:</text>
+          <text class="date-value">{{item.formattedEndDate}} 12:00</text>
+        </view>
+      </view>
+
+      <view wx:if="{{item.created_at}}" class="booking-time">
+        预订时间: {{item.formattedCreatedAt}}
+      </view>
+
+      <!-- 特殊状态信息 -->
+      <view wx:if="{{item.status === 'cancelled' && item.rejection_reason}}" 
+            class="rejection-info">
+        <text class="rejection-label">取消原因:</text>
+        <text class="rejection-text">{{item.rejection_reason}}</text>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="booking-actions">
+        <button class="detail-btn" 
+                data-booking="{{item}}" 
+                bindtap="viewDetail">
+          查看详情
+        </button>
+        
+        <!-- 取消预订按钮 -->
+        <button wx:if="{{item.status === 'pending' || item.status === 'confirmed'}}" 
+                class="cancel-btn" 
+                data-id="{{item.id}}"
+                bindtap="cancelBooking">
+          取消预订
+        </button>
+        
+        <!-- 删除记录按钮（仅限已完成或已取消） -->
+        <button wx:if="{{item.canDelete}}" 
+                class="delete-btn" 
+                data-id="{{item.id}}"
+                bindtap="deleteBooking">
+          删除记录
+        </button>
+      </view>
+    </view>
+  </template>
+
+  <!-- 底部提示 -->
+  <view wx:if="{{isLoggedIn && (pendingBookings.length > 0 || confirmedBookings.length > 0 || completedBookings.length > 0 || cancelledBookings.length > 0)}}" class="footer-tip">
+    <text>下拉刷新获取最新状态</text>
+  </view>
+
+</view>

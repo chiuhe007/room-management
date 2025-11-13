@@ -94,11 +94,20 @@ exports.getCustomerHistory = async (req, res) => {
 exports.checkCustomerExists = async (req, res) => {
     try {
         const { name } = req.query;
+        
         if (!name) {
             return res.status(400).json({ message: '缺少参数 name' });
         }
+        
+        // URL解码处理，防止中文姓名乱码
+        const decodedName = decodeURIComponent(name);
+        
+        console.log('🔍 检查客户是否存在:', { 
+            original: name, 
+            decoded: decodedName 
+        });
 
-        const [rows] = await pool.query('SELECT * FROM customers WHERE name = ?', [name]);
+        const [rows] = await pool.query('SELECT * FROM customers WHERE name = ?', [decodedName]);
 
         if (rows.length > 0) {
             res.json({ exists: true, customer: rows[0] });

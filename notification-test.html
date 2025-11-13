@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通知功能测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        .log {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 10px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .notification-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            background: #fff;
+        }
+        .unread {
+            background: #e7f3ff;
+            border-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔔 通知功能测试页面</h1>
+    
+    <div class="section info">
+        <h3>📊 当前状态</h3>
+        <p><strong>未读通知数量：</strong><span id="unreadCount">-</span></p>
+        <p><strong>服务器时间：</strong><span id="serverTime">-</span></p>
+        <p><strong>最后更新：</strong><span id="lastUpdate">-</span></p>
+    </div>
+    
+    <div class="section">
+        <h3>🧪 测试操作</h3>
+        <button onclick="testGetUnreadCount()">获取未读数量</button>
+        <button onclick="testGetUnreadNotifications()">获取未读通知</button>
+        <button onclick="testCreateBooking()">创建测试预订</button>
+        <button onclick="startPolling()">开始轮询(30秒)</button>
+        <button onclick="stopPolling()">停止轮询</button>
+        <button onclick="clearLogs()">清空日志</button>
+    </div>
+    
+    <div class="section">
+        <h3>📋 通知列表</h3>
+        <div id="notificationsList">暂无通知</div>
+    </div>
+    
+    <div class="section">
+        <h3>📝 操作日志</h3>
+        <div id="logs" class="log">页面已加载，等待操作...</div>
+    </div>
+
+    <script>
+        let pollingInterval = null;
+        
+        // 日志函数
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('logs');
+            const typePrefix = {
+                'info': '📄',
+                'success': '✅',
+                'error': '❌',
+                'warning': '⚠️'
+            };
+            
+            logElement.innerHTML += `[${timestamp}] ${typePrefix[type]} ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        // API请求函数
+        async function apiRequest(url, options = {}) {
+            try {
+                log(`发送请求: ${options.method || 'GET'} ${url}`);
+                
+                const response = await fetch(`http://localhost:3000/api${url}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (localStorage.getItem('token') || 'test-token'),
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`请求成功: ${JSON.stringify(data)}`, 'success');
+                    return data;
+                } else {
+                    log(`请求失败: ${response.status} - ${JSON.stringify(data)}`, 'error');
+                    throw new Error(`HTTP ${response.status}: ${data.message || response.statusText}`);
+                }
+            } catch (error) {
+                log(`请求异常: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+        
+        // 更新状态显示
+        function updateStatus(unreadCount, serverTime) {
+            document.getElementById('unreadCount').textContent = unreadCount ?? '-';
+            document.getElementById('serverTime').textContent = serverTime || '-';
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+        }
+        
+        // 渲染通知列表
+        function renderNotifications(notifications) {
+            const listElement = document.getElementById('notificationsList');
+            
+            if (!notifications || notifications.length === 0) {
+                listElement.innerHTML = '<p>暂无通知</p>';
+                return;
+            }
+            
+            listElement.innerHTML = notifications.map(notification => `
+                <div class="notification-item ${notification.read ? '' : 'unread'}">
+                    <h4>${notification.title}</h4>
+                    <p>${notification.message}</p>
+                    <small>
+                        时间: ${new Date(notification.timestamp).toLocaleString()} | 
+                        类型: ${notification.type} | 
+                        状态: ${notification.read ? '已读' : '未读'}
+                    </small>
+                    ${!notification.read ? `<br><button onclick="markAsRead(${notification.id})">标记已读</button>` : ''}
+                </div>
+            `).join('');
+        }
+        
+        // 测试获取未读数量
+        async function testGetUnreadCount() {
+            try {
+                const result = await apiRequest('/notifications/unread-count');
+                updateStatus(result.count, null);
+                log(`未读通知数量: ${result.count}`, 'success');
+            } catch (error) {
+                log(`获取未读数量失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 测试获取未读通知
+        async function testGetUnreadNotifications() {
+            try {
+                const result = await apiRequest('/notifications/unread');
+                updateStatus(result.data ? result.data.length : 0, null);
+                renderNotifications(result.data);
+                log(`获取到 ${result.data ? result.data.length : 0} 条未读通知`, 'success');
+            } catch (error) {
+                log(`获取未读通知失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 测试创建预订
+        async function testCreateBooking() {
+            try {
+                const bookingData = {
+                    customer: '测试用户' + Math.floor(Math.random() * 1000),
+                    phone: '13800138000',
+                    idCard: '110101199001011234',
+                    roomType: '测试房型',
+                    startDate: '2024-12-25',
+                    endDate: '2024-12-27',
+                    amount: 299.00,
+                    remark: '通知测试预订'
+                };
+                
+                const result = await apiRequest('/bookings', {
+                    method: 'POST',
+                    body: JSON.stringify(bookingData)
+                });
+                
+                log(`预订创建成功: ${result.data ? result.data.customer : '未知'}`, 'success');
+                
+                // 创建后自动获取通知
+                setTimeout(() => {
+                    testGetUnreadCount();
+                    testGetUnreadNotifications();
+                }, 1000);
+                
+            } catch (error) {
+                log(`创建预订失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 标记为已读
+        async function markAsRead(notificationId) {
+            try {
+                await apiRequest(`/notifications/${notificationId}/read`, {
+                    method: 'PATCH'
+                });
+                log(`通知 ${notificationId} 已标记为已读`, 'success');
+                
+                // 刷新通知列表
+                testGetUnreadCount();
+                testGetUnreadNotifications();
+            } catch (error) {
+                log(`标记已读失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 开始轮询
+        function startPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+            }
+            
+            log('开始轮询通知 (每30秒)', 'info');
+            pollingInterval = setInterval(async () => {
+                log('轮询检查通知...', 'info');
+                await testGetUnreadCount();
+                const unreadCount = parseInt(document.getElementById('unreadCount').textContent);
+                if (unreadCount > 0) {
+                    await testGetUnreadNotifications();
+                }
+            }, 30000);
+        }
+        
+        // 停止轮询
+        function stopPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+                log('已停止轮询', 'warning');
+            }
+        }
+        
+        // 清空日志
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+        
+        // 页面加载时自动检查
+        window.onload = async function() {
+            log('页面加载完成，自动检查通知状态...', 'info');
+            await testGetUnreadCount();
+            await testGetUnreadNotifications();
+        };
+        
+        // 页面关闭时清理
+        window.onbeforeunload = function() {
+            stopPolling();
+        };
+    </script>
+</body>
+</html>

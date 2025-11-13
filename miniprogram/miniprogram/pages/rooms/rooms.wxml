@@ -1,0 +1,109 @@
+<!-- pages/rooms/rooms.wxml -->
+<view class="container">
+  <!-- 快捷筛选 -->
+  <view class="quick-filter">
+    <scroll-view class="filter-scroll" scroll-x="true" show-scrollbar="false">
+      <view class="filter-tags">
+        <view class="filter-tag {{currentFilter === 'all' ? 'active' : ''}}" 
+              data-filter="all" bindtap="onFilterChange">
+          全部房型
+        </view>
+        <view wx:for="{{availableTypes}}" wx:key="index"
+              class="filter-tag {{currentFilter === item ? 'active' : ''}}" 
+              data-filter="{{item}}" bindtap="onFilterChange">
+          {{item}}
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">正在加载房型信息...</text>
+  </view>
+
+  <!-- 房型卡片列表 -->
+  <view wx:else class="room-list">
+    <view wx:if="{{filteredRooms.length === 0}}" class="empty-state">
+      <image class="empty-icon" src="/images/empty-room.svg" mode="aspectFit" />
+      <text class="empty-text">暂无符合条件的房型</text>
+      <button class="refresh-btn" bindtap="refreshRooms">刷新重试</button>
+    </view>
+    
+    <!-- 房型卡片 -->
+    <view wx:for="{{filteredRooms}}" 
+          wx:key="id" 
+          class="room-card">
+      
+      <!-- 房型图片区域 -->
+      <view class="room-image-container">
+        <image class="room-image" 
+               src="{{item.image ? 'http://localhost:3000' + item.image : '/images/default-room.svg'}}" 
+               mode="aspectFill" 
+               lazy-load="true"
+               binderror="onImageError" />
+        
+        <!-- 价格标签 -->
+        <view class="price-tag">
+          <text class="price-symbol">¥</text>
+          <text class="price-value">{{item.price}}</text>
+          <text class="price-unit">/晚</text>
+        </view>
+        
+        <!-- 可预订数量 -->
+        <view class="availability-badge">
+          <text class="availability-text">{{item.availableCount}}间可订</text>
+        </view>
+      </view>
+
+      <!-- 房型信息区域 -->
+      <view class="room-content">
+        <!-- 房型名称和特色标签 -->
+        <view class="room-header">
+          <text class="room-title">{{item.type}}</text>
+          <view class="room-features">
+            <text class="feature-tag" wx:if="{{item.hasWifi}}">WiFi</text>
+            <text class="feature-tag" wx:if="{{item.hasAC}}">空调</text>
+            <text class="feature-tag" wx:if="{{item.hasBreakfast}}">早餐</text>
+          </view>
+        </view>
+
+        <!-- 房型描述 -->
+        <view class="room-description">
+          <text class="desc-text">{{item.description || '舒适温馨的住宿体验，设施完善'}}</text>
+        </view>
+
+        <!-- 房型亮点 -->
+        <view class="room-highlights">
+          <view class="highlight-item">
+            <text class="highlight-icon">🛏️</text>
+            <text class="highlight-text">舒适大床</text>
+          </view>
+          <view class="highlight-item">
+            <text class="highlight-icon">📶</text>
+            <text class="highlight-text">免费WiFi</text>
+          </view>
+          <view class="highlight-item">
+            <text class="highlight-icon">🅿️</text>
+            <text class="highlight-text">免费停车</text>
+          </view>
+        </view>
+
+        <!-- 操作按钮区域 -->
+        <view class="room-actions">
+          <button class="detail-btn" 
+                  data-room="{{item}}" 
+                  bindtap="viewRoomDetail">
+            <text class="btn-text">查看详情</text>
+          </button>
+          <button class="book-btn" 
+                  data-room="{{item}}" 
+                  bindtap="bookRoom">
+            <text class="btn-text">立即预订</text>
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

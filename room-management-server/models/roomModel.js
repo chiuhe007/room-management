@@ -10,10 +10,10 @@ module.exports = {
     return rows[0];
   },
   async create(room) {
-    const { room_number, type, price, status, description } = room;
+    const { room_number, type, price, status, description, image } = room;
     const [result] = await db.query(
-      'INSERT INTO rooms (room_number, type, price, status, description) VALUES (?, ?, ?, ?, ?)',
-      [room_number, type, price, status, description]
+      'INSERT INTO rooms (room_number, type, price, status, description, image) VALUES (?, ?, ?, ?, ?, ?)',
+      [room_number, type, price, status, description, image]
     );
     return result.insertId;
   },
@@ -21,7 +21,7 @@ module.exports = {
     const fields = [];
     const values = [];
 
-    ['room_number', 'type', 'price', 'status', 'description'].forEach(key => {
+    ['room_number', 'type', 'price', 'status', 'description', 'image'].forEach(key => {
       if (room[key] !== undefined) {
         fields.push(`${key} = ?`);
         values.push(room[key]);

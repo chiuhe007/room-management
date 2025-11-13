@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Token 检查工具</title>
+</head>
+<body>
+    <h2>当前认证状态检查</h2>
+    <div id="result"></div>
+    
+    <script>
+        console.log('=== 认证状态检查 ===');
+        
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        const username = localStorage.getItem('username');
+        
+        const result = document.getElementById('result');
+        
+        if (token) {
+            console.log('✅ 找到token:', token.substring(0, 50) + '...');
+            result.innerHTML = `
+                <p><strong>Token:</strong> ${token.substring(0, 50)}...</p>
+                <p><strong>Role:</strong> ${role}</p>
+                <p><strong>Username:</strong> ${username}</p>
+                <p>Token长度: ${token.length}</p>
+            `;
+            
+            // 测试API调用
+            fetch('http://localhost:3000/api/bookings?status=pending', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                console.log('API响应状态:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('API响应数据:', data);
+                result.innerHTML += `<p><strong>API测试:</strong> 成功 - ${data.data?.length || 0} 条记录</p>`;
+            })
+            .catch(error => {
+                console.error('API测试失败:', error);
+                result.innerHTML += `<p><strong>API测试:</strong> 失败 - ${error.message}</p>`;
+            });
+            
+        } else {
+            console.log('❌ 没有找到token');
+            result.innerHTML = '<p style="color: red;">没有找到认证token</p>';
+        }
+    </script>
+</body>
+</html>

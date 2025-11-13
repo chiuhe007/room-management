@@ -1,0 +1,168 @@
+<!-- pages/booking/booking.wxml -->
+<view class="container">
+  <!-- 房间信息展示 -->
+  <view class="room-info-card">
+    <view class="room-header">
+      <view class="room-price">¥{{roomInfo.price}}/晚</view>
+    </view>
+    <view class="room-type">可预订 {{roomInfo.availableCount}} 间</view>
+  </view>
+
+  <!-- 预订表单 -->
+  <view class="booking-form">
+    <view class="form-section">
+      <view class="section-title">预订类型</view>
+      
+      <view class="booking-type-selector">
+        <view class="type-option {{bookingType === 'self' ? 'active' : ''}}" 
+              data-type="self" 
+              bindtap="onBookingTypeChange">
+          <view class="type-icon">👤</view>
+          <view class="type-text">为自己预订</view>
+          <view class="type-desc">使用我的个人信息</view>
+        </view>
+        
+        <view class="type-option {{bookingType === 'other' ? 'active' : ''}}" 
+              data-type="other" 
+              bindtap="onBookingTypeChange">
+          <view class="type-icon">👥</view>
+          <view class="type-text">为朋友预订</view>
+          <view class="type-desc">填写入住人信息</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-section">
+      <view class="section-title">入住人信息</view>
+      
+      <!-- 为自己预订时显示用户信息 -->
+      <view wx:if="{{bookingType === 'self'}}" class="user-info-display">
+        <view class="info-item">
+          <view class="info-label">姓名</view>
+          <view class="info-value">{{userInfo.realName || '请先完善个人信息'}}</view>
+        </view>
+        
+        <view class="info-item">
+          <view class="info-label">手机号</view>
+          <view class="info-value">{{userInfo.phone || '请先完善手机号'}}</view>
+        </view>
+        
+        <view class="info-item">
+          <view class="info-label">身份证</view>
+          <view class="info-value">{{userInfo.idCard || '请先完善身份证号'}}</view>
+        </view>
+        
+        <view wx:if="{{!isUserInfoComplete}}" class="info-warning">
+          <view class="warning-icon">💡</view>
+          <view class="warning-text">
+            信息不完整，请先完善个人信息
+          </view>
+          <button class="go-profile-btn" bindtap="goToProfile">去完善</button>
+        </view>
+      </view>
+      
+      <!-- 为朋友预订时显示输入表单 -->
+      <view wx:if="{{bookingType === 'other'}}">
+        <view class="form-item">
+          <view class="label">入住人姓名 *</view>
+          <input class="input" 
+                 placeholder="请输入姓名" 
+                 value="{{form.customer}}" 
+                 data-field="customer"
+                 bindinput="onInputChange" />
+        </view>
+        
+        <view class="form-item">
+          <view class="label">联系手机 *</view>
+          <input class="input" 
+                 type="number"
+                 placeholder="请输入手机号" 
+                 value="{{form.phone}}" 
+                 data-field="phone"
+                 bindinput="onInputChange" />
+        </view>
+        
+        <view class="form-item">
+          <view class="label">身份证号 *</view>
+          <input class="input" 
+                 placeholder="请输入身份证号" 
+                 value="{{form.idCard}}" 
+                 data-field="idCard"
+                 bindinput="onInputChange" />
+        </view>
+      </view>
+    </view>
+
+    <view class="form-section">
+      <view class="section-title">入住信息</view>
+      
+      <view class="form-item">
+        <view class="label">入住日期 *</view>
+        <picker mode="date" 
+                start="{{today}}" 
+                end="{{maxDate}}" 
+                value="{{form.startDate}}"
+                data-field="startDate"
+                bindchange="onDateChange">
+          <view class="date-picker">
+            {{form.startDate || '请选择入住日期'}}
+          </view>
+        </picker>
+      </view>
+      
+      <view class="form-item">
+        <view class="label">离店日期 *</view>
+        <picker mode="date" 
+                start="{{form.startDate || today}}" 
+                end="{{maxDate}}" 
+                value="{{form.endDate}}"
+                data-field="endDate"
+                bindchange="onDateChange">
+          <view class="date-picker">
+            {{form.endDate || '请选择离店日期'}}
+          </view>
+        </picker>
+      </view>
+      
+      <view class="form-item">
+        <view class="label">特殊需求</view>
+        <textarea class="textarea" 
+                  placeholder="有特别要求可以告诉我们" 
+                  value="{{form.remark}}" 
+                  data-field="remark"
+                  bindinput="onInputChange">
+        </textarea>
+      </view>
+    </view>
+
+    <!-- 费用明细 -->
+    <view wx:if="{{nights > 0}}" class="cost-section">
+      <view class="section-title">费用明细</view>
+      
+      <view class="cost-item">
+        <view class="cost-label">入住天数</view>
+        <view class="cost-value">{{nights}} 晚</view>
+      </view>
+      
+      <view class="cost-item">
+        <view class="cost-label">房间单价</view>
+        <view class="cost-value">¥{{roomInfo.price}}/晚</view>
+      </view>
+      
+      <view class="cost-item total">
+        <view class="cost-label">总计金额</view>
+        <view class="cost-value total-amount">¥{{totalAmount}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="submit-section">
+    <button class="cancel-btn" bindtap="goBack">返回</button>
+    <button class="submit-btn {{submitting ? 'submitting' : ''}}" 
+            bindtap="submitBooking"
+            disabled="{{submitting}}">
+      {{submitting ? '提交中...' : '确认预订'}}
+    </button>
+  </view>
+</view>

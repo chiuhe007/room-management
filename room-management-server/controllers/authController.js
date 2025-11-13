@@ -90,30 +90,187 @@ exports.register = async (req, res) => {
 
 // 登录接口
 exports.login = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, captchaId } = req.body;
+  
+  console.log('📝 登录请求数据:', { username, hasCaptchaId: !!captchaId, hasPassword: !!password });
+  
   try {
-    const [users] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
+    // 1. 基本参数校验
+    if (!username || !password) {
+      console.log('❌ 缺少必填参数');
+      return res.status(400).json({ 
+        success: false,
+        message: '用户名和密码不能为空' 
+      });
+    }
+
+    // 2. 检查滑块验证码（只有当提供了captchaId时才验证）
+    if (captchaId) {
+      console.log('🔍 检查滑块验证状态，captchaId:', captchaId);
+      
+      try {
+        // 获取滑块验证码存储 (从滑块验证码模块导入)
+        const captchaModule = require('./backend-slider-captcha-example');
+        const captchaStore = captchaModule.getCaptchaStore ? captchaModule.getCaptchaStore() : new Map();
+        
+        const captchaInfo = captchaStore.get(captchaId);
+        console.log('🔍 验证码信息:', captchaInfo);
+        
+        if (!captchaInfo) {
+          console.log('❌ 验证码不存在或已过期');
+          return res.status(403).json({ 
+            success: false,
+            message: '验证码不存在或已过期，请重新验证',
+            needCaptcha: true
+          });
+        }
+        
+        if (!captchaInfo.verified) {
+          console.log('❌ 验证码未通过验证');
+          return res.status(403).json({ 
+            success: false,
+            message: '请先完成滑块验证',
+            needCaptcha: true
+          });
+        }
+        
+        // 验证通过后删除验证码，防止重复使用
+        captchaStore.delete(captchaId);
+        console.log('✅ 滑块验证通过，验证码已删除');
+      } catch (captchaError) {
+        console.log('⚠️ 滑块验证模块加载失败，跳过验证:', captchaError.message);
+      }
+    } else {
+      console.log('ℹ️ 跳过滑块验证（未提供captchaId）');
+    }
+
+    // 3. 验证用户名密码
+    console.log('🔍 查询用户:', username);
+    const [users] = await db.query('SELECT id, username, password, role, email, status FROM users WHERE username = ?', [username]);
+    
     if (users.length === 0) {
-      return res.status(401).json({ message: '用户不存在' });
+      console.log('❌ 用户不存在:', username);
+      return res.status(401).json({ 
+        success: false,
+        message: '用户名或密码错误' // 不透露具体是用户名还是密码错误，提高安全性
+      });
     }
 
     const user = users[0];
+    console.log('✅ 找到用户:', { id: user.id, username: user.username, role: user.role, status: user.status });
+    
+    // 检查用户状态
+    if (user.status === 'disabled') {
+      console.log('❌ 用户已被禁用:', username);
+      return res.status(403).json({ 
+        success: false,
+        message: '账户已被禁用，请联系管理员' 
+      });
+    }
+    
+    console.log('🔍 验证密码中...');
     const valid = await bcrypt.compare(password, user.password);
+    
     if (!valid) {
-      return res.status(401).json({ message: '用户名或密码错误' });
+      console.log('❌ 密码错误:', username);
+      return res.status(401).json({ 
+        success: false,
+        message: '用户名或密码错误' 
+      });
     }
 
+    // 4. 生成 JWT token
     const token = jwt.sign(
-      { id: user.id, username: user.username, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '2h' }
+      { 
+        id: user.id, 
+        username: user.username, 
+        role: user.role,
+        email: user.email
+      },
+      process.env.JWT_SECRET || 'your_jwt_secret',
+      { expiresIn: '24h' }
     );
 
-    // 多返回 username，方便前端显示
-    res.json({ token, role: user.role, username: user.username });
+    // 5. 设置会话信息（备用方案）
+    if (req.session) {
+      req.session.userId = user.id;
+      req.session.userRole = user.role;
+      req.session.username = user.username;
+    }
+
+    console.log('✅ 用户登录成功:', {
+      用户名: user.username,
+      角色: user.role,
+      用户ID: user.id,
+      会话ID: req.session?.id
+    });
+
+    // 6. 返回登录结果
+    res.json({ 
+      success: true,
+      token, 
+      role: user.role, 
+      username: user.username,
+      userId: user.id,
+      message: '登录成功'
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: '登录失败' });
+    console.error('❌ 登录失败详细错误:', err);
+    console.error('❌ 错误堆栈:', err.stack);
+    res.status(500).json({ 
+      success: false,
+      message: '服务器错误，登录失败',
+      error: process.env.NODE_ENV === 'development' ? err.message : '内部服务器错误'
+    });
   }
 };
 
+// 获取当前用户信息
+exports.getCurrentUser = async (req, res) => {
+  try {
+    console.log('✅ /me 接口被调用');
+    res.json({
+      success: true,
+      user: {
+        id: req.user.id,
+        username: req.user.username,
+        role: req.user.role,
+        email: req.user.email || '',
+      }
+    });
+  } catch (error) {
+    console.error('获取用户信息错误:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取用户信息失败'
+    });
+  }
+};
+
+// 注销接口
+exports.logout = async (req, res) => {
+  try {
+    // 销毁会话
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('❌ 会话销毁失败:', err);
+        return res.status(500).json({
+          success: false,
+          message: '注销失败'
+        });
+      }
+      
+      console.log('✅ 用户注销成功');
+      res.json({
+        success: true,
+        message: '注销成功'
+      });
+    });
+  } catch (error) {
+    console.error('❌ 注销错误:', error);
+    res.status(500).json({
+      success: false,
+      message: '注销失败'
+    });
+  }
+};

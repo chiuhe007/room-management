@@ -1,0 +1,52 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/rooms/rooms",
+    "pages/booking/booking",
+    "pages/my-bookings/my-bookings",
+    "pages/profile/profile",
+    "pages/logs/logs"
+  ],
+  "tabBar": {
+    "color": "#8a8a8a",
+    "selectedColor": "#1976d2",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "🏠 主页"
+      },
+      {
+        "pagePath": "pages/rooms/rooms",
+        "text": "🏨 预订"
+      },
+      {
+        "pagePath": "pages/my-bookings/my-bookings",
+        "text": "📋 行程"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "👤 我的"
+      }
+    ]
+  },
+  "window": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "酒店预订助手",
+    "navigationBarBackgroundColor": "#1976d2",
+    "backgroundColor": "#e3f2fd"
+  },
+  "style": "v2",
+  "rendererOptions": {
+    "skyline": {
+      "defaultDisplayBlock": true,
+      "disableABTest": true,
+      "sdkVersionBegin": "3.0.0",
+      "sdkVersionEnd": "15.255.255"
+    }
+  },
+  "componentFramework": "glass-easel",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

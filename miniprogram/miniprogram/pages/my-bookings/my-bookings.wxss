@@ -1,0 +1,625 @@
+/* pages/my-bookings/my-bookings.wxss */
+.container {
+  padding: 0;
+  background: linear-gradient(135deg, #e3f2fd 0%, #f8fbff 100%);
+  min-height: 100vh;
+}
+
+/* 工具栏样式 */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  background: white;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.page-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.hidden-count {
+  font-size: 24rpx;
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 16rpx;
+}
+
+.toolbar-right {
+  display: flex;
+  gap: 20rpx;
+}
+
+.manage-btn {
+  font-size: 24rpx;
+  padding: 12rpx 24rpx;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 20rpx;
+  line-height: 1.2;
+}
+
+.manage-btn::after {
+  border: none;
+}
+
+/* 预订容器 */
+.bookings-container {
+  padding: 20rpx;
+}
+
+/* 分组标题 */
+.section {
+  margin-bottom: 40rpx;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding: 15rpx 20rpx;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.title-icon {
+  font-size: 32rpx;
+  margin-right: 12rpx;
+}
+
+.title-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+/* 预订卡片基础样式 */
+.booking-card {
+  background: white;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease;
+  display: flex;
+  flex-direction: row;
+  min-height: 180rpx;
+}
+
+.booking-card:active {
+  transform: scale(0.98);
+}
+
+/* 不同状态的边框色 */
+.booking-card.pending {
+  border-left: 6rpx solid #f59e0b;
+}
+
+.booking-card.confirmed {
+  border-left: 6rpx solid #10b981;
+}
+
+.booking-card.completed {
+  border-left: 6rpx solid #6366f1;
+}
+
+.booking-card.cancelled {
+  border-left: 6rpx solid #ef4444;
+}
+
+/* 房间图片区域 */
+.room-image {
+  position: relative;
+  width: 240rpx;
+  height: 180rpx;
+  flex-shrink: 0;
+  border-radius: 16rpx 0 0 16rpx;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f0f2f5 0%, #e9ecef 100%);
+  padding: 0;
+  margin: 0;
+}
+
+.room-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.status-tag {
+  position: absolute;
+  top: 12rpx;
+  right: 12rpx;
+  padding: 6rpx 12rpx;
+  border-radius: 12rpx;
+  font-size: 20rpx;
+  font-weight: 600;
+  color: white;
+  backdrop-filter: blur(4rpx);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+/* 状态标签颜色 */
+.status-pending {
+  background: rgba(245, 158, 11, 0.9);
+}
+
+.status-confirmed {
+  background: rgba(16, 185, 129, 0.9);
+}
+
+.status-checkedin,
+.status-completed {
+  background: rgba(99, 102, 241, 0.9);
+}
+
+.status-cancelled {
+  background: rgba(239, 68, 68, 0.9);
+}
+
+/* 预订内容区域 */
+.booking-content {
+  flex: 1;
+  padding: 20rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12rpx;
+}
+
+.booking-id {
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+.booking-amount {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+/* 房间信息 */
+.room-info {
+  margin-bottom: 12rpx;
+}
+
+.room-type {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 4rpx;
+}
+
+.customer-name {
+  font-size: 24rpx;
+  color: #6b7280;
+}
+
+/* 日期信息 */
+.date-info {
+  margin-bottom: 8rpx;
+}
+
+.date-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4rpx;
+}
+
+.date-label {
+  font-size: 24rpx;
+  color: #6b7280;
+  width: 80rpx;
+}
+
+.date-value {
+  font-size: 24rpx;
+  color: #374151;
+  font-weight: 500;
+}
+
+/* 预订时间 */
+.booking-time {
+  font-size: 22rpx;
+  color: #9ca3af;
+  margin-bottom: 12rpx;
+}
+
+/* 拒绝原因 */
+.rejection-info {
+  background: rgba(239, 68, 68, 0.1);
+  padding: 12rpx;
+  border-radius: 8rpx;
+  margin-bottom: 12rpx;
+}
+
+.rejection-label {
+  font-size: 22rpx;
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.rejection-text {
+  font-size: 24rpx;
+  color: #7f1d1d;
+  margin-top: 4rpx;
+}
+
+/* 操作按钮 */
+.booking-actions {
+  display: flex;
+  gap: 12rpx;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.booking-actions button {
+  flex: 1;
+  min-width: 120rpx;
+  font-size: 24rpx;
+  padding: 12rpx 20rpx;
+  border-radius: 8rpx;
+  line-height: 1.2;
+}
+
+.detail-btn {
+  background: #f3f4f6;
+  color: #374151;
+  border: 2rpx solid #d1d5db;
+}
+
+.detail-btn::after {
+  border: none;
+}
+
+.cancel-btn {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 2rpx solid #fecaca;
+}
+
+.cancel-btn::after {
+  border: none;
+}
+
+.delete-btn {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+}
+
+.delete-btn::after {
+  border: none;
+}
+
+/* 登录面板样式 */
+.login-panel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e3f2fd 0%, #f8fbff 100%);
+  padding: 40rpx;
+}
+
+.login-card {
+  background: white;
+  border-radius: 32rpx;
+  padding: 60rpx 40rpx;
+  width: 100%;
+  max-width: 600rpx;
+  text-align: center;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.15);
+}
+
+.login-icon {
+  font-size: 120rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.8;
+}
+
+.login-title {
+  font-size: 48rpx;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 20rpx;
+}
+
+.login-desc {
+  font-size: 28rpx;
+  color: #4a5568;
+  line-height: 1.6;
+  margin-bottom: 50rpx;
+  padding: 0 20rpx;
+}
+
+.login-btn {
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+  color: white;
+  border: none;
+  border-radius: 48rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40rpx;
+  box-shadow: 0 8rpx 20rpx rgba(33, 150, 243, 0.3);
+}
+
+.login-icon-text {
+  font-size: 32rpx;
+  margin-right: 16rpx;
+}
+
+.login-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 4rpx 10rpx rgba(33, 150, 243, 0.4);
+}
+
+.guest-options {
+  margin-bottom: 40rpx;
+  padding-top: 30rpx;
+  border-top: 1rpx solid #e2e8f0;
+}
+
+.guest-text {
+  font-size: 28rpx;
+  color: #718096;
+  margin-bottom: 20rpx;
+}
+
+.guest-btn {
+  background: rgba(33, 150, 243, 0.1);
+  color: #1976d2;
+  border: 2rpx solid #2196f3;
+  border-radius: 40rpx;
+  padding: 16rpx 40rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.guest-btn-text {
+  font-size: 28rpx;
+}
+
+.guest-btn:active {
+  background: rgba(102, 126, 234, 0.2);
+}
+
+.login-tips {
+  text-align: left;
+}
+
+.tip-item {
+  font-size: 26rpx;
+  color: #718096;
+  margin-bottom: 12rpx;
+  display: flex;
+  align-items: center;
+}
+
+/* 搜索面板 */
+.search-panel {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+}
+
+.search-card {
+  background: white;
+  padding: 60rpx 40rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 500rpx;
+  text-align: center;
+}
+
+.search-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.search-desc {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 40rpx;
+}
+
+.search-form {
+  display: flex;
+  flex-direction: column;
+  gap: 30rpx;
+}
+
+.phone-input {
+  padding: 30rpx;
+  border: 2rpx solid #e5e5e5;
+  border-radius: 10rpx;
+  font-size: 32rpx;
+  text-align: center;
+  background: #f8f9fa;
+}
+
+.search-btn {
+  padding: 30rpx;
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+  color: white;
+  border: none;
+  border-radius: 50rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+/* 加载状态 */
+.loading {
+  padding: 100rpx 0;
+  text-align: center;
+  color: #999;
+  font-size: 28rpx;
+}
+
+/* 空状态 */
+.empty {
+  padding: 200rpx 40rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 30rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #999;
+  margin-bottom: 50rpx;
+}
+
+.book-now-btn {
+  padding: 25rpx 60rpx;
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+  color: white;
+  border: none;
+  border-radius: 50rpx;
+  font-size: 30rpx;
+  font-weight: bold;
+}
+
+/* 底部提示 */
+.footer-tip {
+  text-align: center;
+  padding: 40rpx 0;
+  color: #999;
+  font-size: 24rpx;
+}
+
+/* 工具栏样式 */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  margin-bottom: 20rpx;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.page-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.hidden-count {
+  font-size: 24rpx;
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 16rpx;
+}
+
+.toolbar-right {
+  display: flex;
+  gap: 20rpx;
+}
+
+.manage-btn {
+  font-size: 24rpx;
+  padding: 12rpx 24rpx;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 20rpx;
+  line-height: 1.2;
+}
+
+.manage-btn::after {
+  border: none;
+}
+
+/* 删除按钮样式 */
+.delete-btn {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 16rpx;
+  font-size: 24rpx;
+  padding: 12rpx 24rpx;
+  margin-left: 20rpx;
+  line-height: 1.2;
+}
+
+.delete-btn::after {
+  border: none;
+}
+
+/* 更新操作按钮区域 */
+.booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+  margin-top: 30rpx;
+  padding-top: 20rpx;
+  border-top: 2rpx solid #f0f0f0;
+}
+
+.booking-actions button {
+  flex: 1;
+  min-width: 140rpx;
+}
+
+/* 响应式设计 */
+@media screen and (max-width: 750rpx) {
+  .container {
+    padding: 15rpx;
+  }
+  
+  .booking-card {
+    margin-bottom: 20rpx;
+  }
+  
+  .booking-info {
+    padding: 20rpx;
+    padding-top: 50rpx;
+  }
+  
+  .booking-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10rpx;
+  }
+}

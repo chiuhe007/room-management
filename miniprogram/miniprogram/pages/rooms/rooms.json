@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "预订房型",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#e3f2fd",
+  "navigationBarBackgroundColor": "#1976d2",
+  "navigationBarTextStyle": "white"
+}

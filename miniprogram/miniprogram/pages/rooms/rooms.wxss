@@ -1,0 +1,292 @@
+/* pages/rooms/rooms.wxss */
+page {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f8fbff 100%);
+  min-height: 100vh;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.container {
+  padding: 0;
+  padding-bottom: 100rpx;
+  margin: 0;
+  display: block;
+  align-items: initial;
+  justify-content: initial;
+  height: auto;
+}
+
+/* 快捷筛选 */
+.quick-filter {
+  background: white;
+  padding: 16rpx 0;
+  margin: 0;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.filter-scroll {
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-tags {
+  display: inline-flex;
+  padding: 0 24rpx;
+  white-space: nowrap;
+  gap: 16rpx;
+}
+
+.filter-tag {
+  flex-shrink: 0;
+  background: #f5f9ff;
+  color: #1976d2;
+  padding: 12rpx 24rpx;
+  border-radius: 40rpx;
+  font-size: 24rpx;
+  margin-right: 0;
+  transition: all 0.3s ease;
+  border: 1rpx solid #e3f2fd;
+}
+
+.filter-tag.active {
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+  color: white;
+  transform: translateY(-1rpx);
+  box-shadow: 0 4rpx 12rpx rgba(33, 150, 243, 0.3);
+}
+
+/* 加载状态 */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 0;
+  color: #1976d2;
+}
+
+.loading-spinner {
+  width: 50rpx;
+  height: 50rpx;
+  border: 4rpx solid #e3f2fd;
+  border-top: 4rpx solid #2196f3;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 24rpx;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 26rpx;
+  opacity: 0.8;
+}
+
+/* 房型列表 */
+.room-list {
+  padding: 16rpx 24rpx 0 24rpx;
+}
+
+/* 房型卡片 */
+.room-card {
+  background: white;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1rpx solid #e3f2fd;
+}
+
+.room-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.12);
+}
+
+/* 房型图片容器 */
+.room-image-container {
+  position: relative;
+  height: 320rpx;
+  overflow: hidden;
+}
+
+.room-image {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s ease;
+}
+
+/* 价格标签 */
+.price-tag {
+  position: absolute;
+  top: 20rpx;
+  right: 20rpx;
+  background: rgba(25, 118, 210, 0.9);
+  color: white;
+  padding: 12rpx 20rpx;
+  border-radius: 40rpx;
+  display: flex;
+  align-items: baseline;
+  backdrop-filter: blur(10rpx);
+}
+
+.price-symbol {
+  font-size: 24rpx;
+  margin-right: 2rpx;
+}
+
+.price-value {
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.price-unit {
+  font-size: 22rpx;
+  margin-left: 4rpx;
+  opacity: 0.9;
+}
+
+/* 可预订标签 */
+.availability-badge {
+  position: absolute;
+  bottom: 16rpx;
+  left: 16rpx;
+  background: rgba(76, 175, 80, 0.9);
+  color: white;
+  padding: 8rpx 16rpx;
+  border-radius: 16rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.availability-text {
+  font-size: 22rpx;
+  font-weight: 500;
+}
+
+/* 房型内容区域 */
+.room-content {
+  padding: 24rpx 20rpx;
+}
+
+/* 房型头部 */
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16rpx;
+}
+
+.room-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #0d47a1;
+  flex: 1;
+}
+
+.room-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-bottom: 16rpx;
+}
+
+.feature-tag {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 6rpx 12rpx;
+  border-radius: 12rpx;
+  font-size: 20rpx;
+  font-weight: 500;
+}
+
+/* 房型描述 */
+.room-description {
+  margin-bottom: 20rpx;
+}
+
+.desc-text {
+  font-size: 24rpx;
+  color: #424242;
+  line-height: 1.5;
+}
+
+/* 房型亮点 */
+.room-highlights {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+  padding: 20rpx;
+  background: #f8fbff;
+  border-radius: 12rpx;
+  border: 1rpx solid #e3f2fd;
+}
+
+.highlight-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.highlight-icon {
+  font-size: 26rpx;
+  margin-bottom: 8rpx;
+  color: #2196f3;
+}
+
+.highlight-text {
+  font-size: 20rpx;
+  color: #424242;
+  text-align: center;
+}
+
+/* 操作按钮 */
+.room-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.detail-btn,
+.book-btn {
+  flex: 1;
+  height: 72rpx;
+  border-radius: 36rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.detail-btn {
+  background: #f5f9ff;
+  color: #1976d2;
+  border: 1rpx solid #e3f2fd;
+}
+
+.book-btn {
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+  color: white;
+  box-shadow: 0 4rpx 12rpx rgba(33, 150, 243, 0.3);
+}
+
+.detail-btn:active {
+  transform: scale(0.95);
+  background: #e3f2fd;
+}
+
+.book-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2rpx 6rpx rgba(33, 150, 243, 0.4);
+}
+
+.btn-text {
+  font-size: 26rpx;
+  font-weight: 600;
+}
